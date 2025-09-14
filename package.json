@@ -1,19 +1,21 @@
 {
-  "name": "generic-js-authentication-api",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.16.0",
-  "dependencies": {
-    "express": "5.1.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.2.4"
-  }
+	"name": "generic-js-authentication-api",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node --watch ./src/index.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.16.0",
+	"dependencies": {
+		"express": "5.1.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.4"
+	}
 }
