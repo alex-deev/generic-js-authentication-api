@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+            transition: all 0.3s ease-in-out;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1 class="mb-5 text-2xl font-bold text-blue-600">Welcome back <%= username %></h1>
+
+        <div class="container">
+            <h3 class="font-bold mb-2">Your protected data:</h3>
+            <p>ID: <%= id %></p>
+        </div>
+        <p class="mt-5">Protected content 🔒. Only visible after user authentication.</p>
+    </div>
+</body>
+</html>

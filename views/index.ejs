@@ -156,6 +156,7 @@
             <h2 class="text-3xl font-bold page-title">Welcome Back!</h2>
             <p id="welcome-message" class="text-xl">Hello, user!</p>
             <button id="logout-btn" class="form-button max-w-xs mx-auto">Log Out</button>
+            <button id="goToProtected-btn" class="form-button max-w-xs mx-auto ms-4">Go to Protected</button>
         </div>
     </div>
 
@@ -184,6 +185,7 @@
             const passwordInput = document.getElementById('password');
             const usernameInput = document.getElementById('username');
             const messageBox = document.getElementById('message-box');
+            const goToProtectedBtn = document.getElementById('goToProtected-btn');
 
             let isLoginMode = true;
 
@@ -292,14 +294,16 @@
                         throw new Error(errorMessage);
                     }
 
-                    const userPost = await response.json();
-                    currentUser = userPost;
                     displayMessage('Sign-up successful! You can now log in.');
-                    switchMode(true);
+                    setTimeout(() => switchMode(true), 2000);
                 } catch (error) {
                     displayMessage(error.message, 'error');
                 }
             }
+
+            goToProtectedBtn.addEventListener('click', () => {
+                window.location.href = "http://localhost:3000/protected";
+            });
         });
     </script>
 </body>
