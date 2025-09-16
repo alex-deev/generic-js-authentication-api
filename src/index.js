@@ -6,8 +6,14 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(express.json()); // Use middleware to transform req.body to JSON
 
+app.use((req, res, next) => {
+	const timestamp = new Date().toISOString();
+	console.log(`${timestamp} - ${req.method} ${req.originalUrl} from ${req.ip}`);
+	next(); // Call next to pass control to the next middleware/route handler
+});
+
 app.get('/', (req, res) => {
-	res.render('./base', { name: 'alex' });
+	res.render('./index', { name: 'alex' });
 });
 
 // User session control
