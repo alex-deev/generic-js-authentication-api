@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Sign-up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+            transition: all 0.3s ease-in-out;
+            transform: scale(1);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #3b82f6;
+            color: #ffffff;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .form-button:hover {
+            background-color: #2563eb;
+        }
+
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border-bottom: 2px solid transparent;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+
+        .tab-button.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .page-title {
+            animation: fadeInDown 0.5s ease-out;
+        }
+
+        .form-group {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #message-box {
+            background-color: #e0f2fe;
+            color: #0c4a6e;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <div id="auth-page">
+            <div class="flex justify-center mb-6 border-b border-gray-200">
+                <button id="login-tab" class="tab-button active">Log In</button>
+                <button id="signup-tab" class="tab-button">Sign Up</button>
+            </div>
+            <h2 id="form-title" class="text-3xl font-bold text-center mb-6 page-title">Log In</h2>
+            <form id="auth-form" class="space-y-4">
+                <div id="username-group" class="form-group hidden">
+                    <label for="username" class="sr-only">Username</label>
+                    <input type="text" id="username" placeholder="Username" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="email" class="sr-only">Email</label>
+                    <input type="email" id="email" placeholder="Email" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="password" class="sr-only">Password</label>
+                    <input type="password" id="password" placeholder="Password" required class="form-input">
+                </div>
+                <button type="submit" id="submit-btn" class="form-button">Log In</button>
+            </form>
+            <div id="message-box" class="mt-4 hidden"></div>
+        </div>
+        <div id="dashboard-page" class="hidden text-center space-y-4">
+            <h2 class="text-3xl font-bold page-title">Welcome Back!</h2>
+            <p id="welcome-message" class="text-xl">Hello, user!</p>
+            <button id="logout-btn" class="form-button max-w-xs mx-auto">Log Out</button>
+        </div>
+    </div>
+
+    <script>
+        class ApiError extends Error {
+            constructor(message) {
+                super(message);
+                this.name = 'ApiError'
+            }
+        }
+
+        let currentUser = { _id: '', username: '' };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const authPage = document.getElementById('auth-page');
+            const dashboardPage = document.getElementById('dashboard-page');
+            const loginTab = document.getElementById('login-tab');
+            const signupTab = document.getElementById('signup-tab');
+            const authForm = document.getElementById('auth-form');
+            const formTitle = document.getElementById('form-title');
+            const usernameGroup = document.getElementById('username-group');
+            const submitBtn = document.getElementById('submit-btn');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const logoutBtn = document.getElementById('logout-btn');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const usernameInput = document.getElementById('username');
+            const messageBox = document.getElementById('message-box');
+
+            let isLoginMode = true;
+
+            const displayMessage = (message, type = 'info') => {
+                messageBox.textContent = message;
+                messageBox.className = 'mt-4';
+                if (type === 'error') {
+                    messageBox.style.backgroundColor = '#fee2e2';
+                    messageBox.style.color = '#991b1b';
+                } else {
+                    messageBox.style.backgroundColor = '#e0f2fe';
+                    messageBox.style.color = '#0c4a6e';
+                }
+                messageBox.classList.remove('hidden');
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 3000);
+            };
+
+            const switchMode = (isLogin) => {
+                isLoginMode = isLogin;
+                if (isLoginMode) {
+                    formTitle.textContent = 'Log In';
+                    submitBtn.textContent = 'Log In';
+                    loginTab.classList.add('active');
+                    signupTab.classList.remove('active');
+                    usernameGroup.classList.add('hidden');
+                    usernameInput.removeAttribute('required');
+                } else {
+                    formTitle.textContent = 'Sign Up';
+                    submitBtn.textContent = 'Sign Up';
+                    signupTab.classList.add('active');
+                    loginTab.classList.remove('active');
+                    usernameGroup.classList.remove('hidden');
+                    usernameInput.setAttribute('required', '');
+                }
+                authForm.reset();
+                messageBox.classList.add('hidden');
+            };
+
+            const refreshSession = () => {
+                if (currentUser) {
+                    welcomeMessage.textContent = `Hello, ${currentUser.username}!`;
+                    authPage.classList.add('hidden');
+                    dashboardPage.classList.remove('hidden');
+                } else {
+                    authPage.classList.remove('hidden');
+                    dashboardPage.classList.add('hidden');
+                }
+            };
+
+            loginTab.addEventListener('click', () => switchMode(true));
+            signupTab.addEventListener('click', () => switchMode(false));
+
+            authForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = emailInput.value.trim();
+                const password = passwordInput.value.trim();
+                const username = usernameInput.value.trim();
+
+                if (isLoginMode) {
+                    authApiLogin(email, password)
+                } else {
+                    authApiRegister(email, password)
+                }
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                displayMessage('Logged out successfully.');
+                authForm.reset();
+                currentUser = undefined;
+                setTimeout(refreshSession, 1000);
+            });
+
+            async function authApiLogin(username, password) {
+                try {
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    })
+                    if (!response.ok) {
+                        const errorMessage = await response.text();
+                        throw new Error(errorMessage);
+                    }
+
+                    const userPost = await response.json();
+                    currentUser = userPost;
+                    displayMessage('Login successful!');
+                    setTimeout(refreshSession, 1000);
+
+                } catch (error) {
+                    displayMessage(error.message, 'error');
+                }
+            }
+
+            async function authApiRegister(username, password) {
+                try {
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    })
+                    if (!response.ok) {
+                        const errorMessage = await response.text();
+                        throw new Error(errorMessage);
+                    }
+
+                    const userPost = await response.json();
+                    currentUser = userPost;
+                    displayMessage('Sign-up successful! You can now log in.');
+                    switchMode(true);
+                } catch (error) {
+                    displayMessage(error.message, 'error');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
