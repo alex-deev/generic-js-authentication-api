@@ -34,6 +34,15 @@ app.post('/logout', (req, res) => {});
 // Protected route
 app.post('/protected', (req, res) => {});
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}...`);
+});
+
+// Custom error handlers
+server.on('error', (e) => {
+	if (e.code === 'EADDRINUSE') {
+		console.log(`Port ${PORT} is already in use.`);
+		console.log(`Shutting down.`);
+	}
+	console.error('Server error:', e);
 });
