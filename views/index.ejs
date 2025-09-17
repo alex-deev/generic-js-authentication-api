@@ -156,19 +156,12 @@
             <h2 class="text-3xl font-bold page-title">Welcome Back!</h2>
             <p id="welcome-message" class="text-xl">Hello, user!</p>
             <button id="logout-btn" class="form-button max-w-xs mx-auto">Log Out</button>
-            <button id="goToProtected-btn" class="form-button max-w-xs mx-auto ms-4">Go to Protected</button>
+            <button id="goToProtected-btn" class="form-button max-w-xs mx-auto xl:ms-4">Go to Protected</button>
         </div>
     </div>
 
     <script>
-        class ApiError extends Error {
-            constructor(message) {
-                super(message);
-                this.name = 'ApiError'
-            }
-        }
-
-        let currentUser = { _id: '', username: '' };
+        var currentUser = {id: '<%= recoveredUser.id %>',username: ' <%= recoveredUser.username %>'};
 
         document.addEventListener('DOMContentLoaded', () => {
             const authPage = document.getElementById('auth-page');
@@ -304,6 +297,8 @@
             goToProtectedBtn.addEventListener('click', () => {
                 window.location.href = "http://localhost:3000/protected";
             });
+
+            refreshSession();
         });
     </script>
 </body>

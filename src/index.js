@@ -17,7 +17,17 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-	res.render('./index');
+	// 1. checks if token is present (means user previously authenticated)
+	const token = req.cookies.access_token;
+	if (!token) {
+		return res.render('./index');
+	}
+
+	// 2. checks if token is valid for this site (has the same header, payload and signature key)
+	const data = jwt.verify(token, JWT_SECRET_KEY);
+
+	// 3. authorizes the request and skips login
+	res.render('./index', { recoveredUser: data });
 });
 
 // User session control
