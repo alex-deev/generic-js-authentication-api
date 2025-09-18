@@ -249,11 +249,19 @@
                 }
             });
 
-            logoutBtn.addEventListener('click', () => {
-                displayMessage('Logged out successfully.');
-                authForm.reset();
-                currentUser = undefined;
-                setTimeout(refreshSession, 1000);
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/logout', {method: 'POST'});
+                    if (!response.ok) {
+                        const errorMessage = await response.text();
+                        throw new Error(errorMessage);
+                    }
+                    displayMessage('Logged out successfully.');
+                    currentUser = undefined;
+                    setTimeout(refreshSession, 1000);
+                } catch (error) {
+                    displayMessage(error.message, 'error');
+                }
             });
 
             async function authApiLogin(username, password) {

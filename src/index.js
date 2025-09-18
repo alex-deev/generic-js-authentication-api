@@ -71,7 +71,7 @@ app.post('/login', async (req, res) => {
 			},
 		);
 
-		// 3. responds with cookie and data
+		// 3. responds with cookie and data (starts the session)
 		res
 			.cookie('access_token', token, {
 				httpOnly: true, // only server management of cookie
@@ -93,7 +93,10 @@ app.post('/register', async (req, res) => {
 		res.status(400).send(error.message);
 	}
 });
-app.post('/logout', (req, res) => {});
+app.post('/logout', (req, res) => {
+	// 1. instructs the client to delete the cookie that contains the token (ends the session)
+	res.clearCookie('access_token').send('logout successful');
+});
 
 // Protected route
 app.get('/protected', (req, res) => {
