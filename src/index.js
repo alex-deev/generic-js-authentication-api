@@ -11,23 +11,43 @@ app.use(express.json()); // Middleware to transform req.body to JSON
 app.use(cookieParser()); // Middleware to attach/modify Cookies on requests
 
 app.use((req, res, next) => {
+	// Custom Middleware to centralize token extraction and validation
+
+	// 1. extract token from request's cookies (means user previously authenticated)
+	const token = req.cookies.access_token;
+
+	// 2. defaults the request's session.user as null to enable later checks
+	req.session = { user: null };
+
+	try {
+		// 3. checks if token is valid for this site (has the same header, payload and signature key)
+		const data = jwt.verify(token, JWT_SECRET_KEY);
+
+		// 4. adds token as request's session.user
+		req.session.user = data;
+	} catch {}
+
+	next(); // continue to next middleware or route
+});
+
+app.use((req, res, next) => {
 	const timestamp = new Date().toISOString();
 	console.log(`${timestamp} - ${req.method} ${req.originalUrl} from ${req.ip}`);
 	next(); // Call next to pass control to the next middleware/route handler
 });
 
 app.get('/', (req, res) => {
-	// 1. checks if token is present (means user previously authenticated)
-	const token = req.cookies.access_token;
-	if (!token) {
-		return res.render('./index');
+	const { user } = req.session;
+
+	// 1. checks if token exists (means user was recently verified)
+	if (user) {
+		// 2. authorizes the request and skips login
+		return res.render('./index', {
+			recoveredUser: { id: user.id, username: user.username },
+		});
 	}
 
-	// 2. checks if token is valid for this site (has the same header, payload and signature key)
-	const data = jwt.verify(token, JWT_SECRET_KEY);
-
-	// 3. authorizes the request and skips login
-	res.render('./index', { recoveredUser: data });
+	res.render('./index', { recoveredUser: undefined });
 });
 
 // User session control
@@ -77,23 +97,15 @@ app.post('/logout', (req, res) => {});
 
 // Protected route
 app.get('/protected', (req, res) => {
-	// 1. checks if token is present (means user previously authenticated)
-	const token = req.cookies.access_token;
-	if (!token) {
-		return res.status(403).send('Cannot access here. Protected route 🔒.');
+	const { user } = req.session;
+
+	// 1. checks if user token not present, then reject
+	if (!user) {
+		return res.status(401).send('Cannot access here. Protected route 🔒.');
 	}
 
-	try {
-		// 2. checks if token is valid for this site (has the same header, payload and signature key)
-		const data = jwt.verify(token, JWT_SECRET_KEY);
-
-		// 3. authorizes the request and provide the route source
-		res.render('./protected', data);
-	} catch (error) {
-		return res
-			.status(401)
-			.send('Access not authorized. Authentication is not valid.');
-	}
+	// 2. provide route when token is present & valid (means user previously authenticated)
+	res.render('./protected', user);
 });
 
 const server = app.listen(PORT, () => {
