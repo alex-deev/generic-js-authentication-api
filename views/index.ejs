@@ -161,7 +161,10 @@
     </div>
 
     <script>
-        var currentUser = {id: '<%= recoveredUser.id %>',username: ' <%= recoveredUser.username %>'};
+        // recover user from injected with EJS
+        var recoveredUser = {id: '<%= recoveredUser?.id || "Unknown" %>',username: ' <%= recoveredUser?.username || "Unknown" %>'};
+        let currentUser = recoveredUser.id !== 'Unknown' ? recoveredUser : undefined;
+        console.log(currentUser);
 
         document.addEventListener('DOMContentLoaded', () => {
             const authPage = document.getElementById('auth-page');
